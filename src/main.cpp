@@ -97,54 +97,54 @@ class Perceptron {
         }
 };
 
-int main() {
-    // Initialize points
-    vector<Point*> points;
-    int numPoints = 50;
-    for (int i = 0; i < numPoints; i++) {
-        Point* point = new Point();
-        points.push_back(point);
-    }
+// int main() {
+//     // Initialize points
+//     vector<Point*> points;
+//     int numPoints = 50;
+//     for (int i = 0; i < numPoints; i++) {
+//         Point* point = new Point();
+//         points.push_back(point);
+//     }
 
-    // Initialize perceptron model
-    Perceptron perceptron(2, 0.5);
+//     // Initialize perceptron model
+//     Perceptron perceptron(2, 0.5);
 
-    // Train
-    int epochs = 10000;
-    for (int epoch = 0; epoch < epochs; epoch++) {
-        for (Point* point : points) {
-            vector<float> inputs = {point->x, point->y};
-            int target = point->label;
-            perceptron.train(inputs, target);
-        }
-    }
+//     // Train
+//     int epochs = 10000;
+//     for (int epoch = 0; epoch < epochs; epoch++) {
+//         for (Point* point : points) {
+//             vector<float> inputs = {point->x, point->y};
+//             int target = point->label;
+//             perceptron.train(inputs, target);
+//         }
+//     }
     
-    // Evaluate
-    for (Point* point : points) {
-        vector<float> inputs = {point->x, point->y};
-        int prediction = perceptron.predict(inputs);
-        float guessY = perceptron.guessY(point->x);
+//     // Evaluate
+//     for (Point* point : points) {
+//         vector<float> inputs = {point->x, point->y};
+//         int prediction = perceptron.predict(inputs);
+//         float guessY = perceptron.guessY(point->x);
 
-        string correct;
-        if (prediction == point->label) {
-            correct = "Correct";
-        } else {
-            correct = "Incorrect";
-        }
-        cout << "(" << point->x << "," << point->y << ") => " << guessY << ":" << correct << endl;
-    }
+//         string correct;
+//         if (prediction == point->label) {
+//             correct = "Correct";
+//         } else {
+//             correct = "Incorrect";
+//         }
+//         cout << "(" << point->x << "," << point->y << ") => " << guessY << ":" << correct << endl;
+//     }
 
-    float x1 = -1.0;
-    float x2 = 1.0;
-    float y1 = perceptron.guessY(x1);
-    float y2 = perceptron.guessY(x2);
-    float m = (y2-y1) / (x2-x1);
-    float b = y2 - m * x2;
-    cout << "Line: " << "y = " << m << "x + " << b << endl;
+//     float x1 = -1.0;
+//     float x2 = 1.0;
+//     float y1 = perceptron.guessY(x1);
+//     float y2 = perceptron.guessY(x2);
+//     float m = (y2-y1) / (x2-x1);
+//     float b = y2 - m * x2;
+//     cout << "Line: " << "y = " << m << "x + " << b << endl;
     
-    // Clean up
-    for (Point* point : points) {
-        delete point;
-    }
-    return 0;
-}
+//     // Clean up
+//     for (Point* point : points) {
+//         delete point;
+//     }
+//     return 0;
+// }

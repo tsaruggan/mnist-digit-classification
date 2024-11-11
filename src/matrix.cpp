@@ -105,6 +105,21 @@ class Matrix {
             return result;
         }
 
+        // matrix transpose
+        Matrix transpose() {
+            if (rows != cols) {
+                throw invalid_argument("Number of columns must equal number of rows.");
+            }
+
+            Matrix result = Matrix(rows, cols);
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
+                    result.set(j, i, cells[i][j]);
+                }
+            }
+            return result;
+        }
+
         void print() {
             for (int i = 0; i < rows; i++) {
                 cout << "[ ";

@@ -31,4 +31,8 @@ int main() {
 
     Matrix c = a.matMultiply(b);
     c.print();
+    cout << endl;
+
+    Matrix d = c.transpose();
+    d.print();
 }

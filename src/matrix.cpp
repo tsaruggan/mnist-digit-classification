@@ -14,9 +14,7 @@ class Matrix {
         Matrix(int rows, int cols) {
             this->rows = rows;
             this->cols = cols;
-
-            // initialize the cells with zeros
-            cells = vector<vector<float>>(rows, vector<float>(cols, 0.0f));
+            cells = vector<vector<float>>(rows, vector<float>(cols, 0.0f)); // init with zeros
         }
 
         // get cell value at given position
@@ -29,66 +27,47 @@ class Matrix {
             cells[row][col] = value;
         }
 
-        // set cells to random values in range
-        void randomize(float rangeMin, float rangeMax) {
+        // set cells to random values in (-1, 1)
+        void randomize() {
             // seed random engine with device
             random_device rd;
             mt19937 gen(rd());
 
             // define range for the random numbers
-            uniform_real_distribution<> dist(rangeMin, rangeMax);
+            uniform_real_distribution<float> dist(-1, 1);
     
             // set random values at each cell
             for (int i = 0; i < rows; i++) {
                 for (int j = 0; j < cols; j++) {
-                    cells[i][j] = floor(dist(gen));
+                    cells[i][j] = dist(gen);
                 }
             }
         }
 
-        // add each element by a scalar value
-        void add(int n) {
-            for (int i = 0; i < rows; i++) {
-                for (int j = 0; j < cols; j++) {
-                    cells[i][j] += n;
-                }
-            }
+        // add a scalar value to every element in matrix
+        void add(float n) {
+            map([n](float x, int i, int j) { return x + n; });
         }
 
-        // multiply each element by a scalar value
-        void multiply(int n) {
-            for (int i = 0; i < rows; i++) {
-                for (int j = 0; j < cols; j++) {
-                    cells[i][j] *= n;
-                }
-            }
+        // multiply a scalar value to every element in matrix
+        void multiply(float n) {
+            map([n](float x, int i, int j) { return x * n; });
         }
         
-        // add another matrix element-wise
+        // element-wise add another matrix
         void add(const Matrix& other) {
-            for (int i = 0; i < rows; i++) {
-                for (int j = 0; j < cols; j++) {
-                    cells[i][j] += other.get(i, j);
-                }
-            }
+            map([&other](float x, int i, int j) { return x + other.get(i, j); });
         }
 
-        // multiply another matrix element-wise (hadamard)
+        // element-wise multiply another matrix (hadamard)
         void multiply(const Matrix& other) {
-            for (int i = 0; i < rows; i++) {
-                for (int j = 0; j < cols; j++) {
-                    cells[i][j] *= other.get(i, j);
-                }
-            }
+            map([&other](float x, int i, int j) { return x * other.get(i, j); });
         }
 
-        // matrix multiplication
-        Matrix matMultiply(const Matrix& other) {
-            Matrix& a = *this;
-            Matrix b = other;
-
+        // static matrix multiplication: a x b
+        static Matrix multiply(const Matrix& a, const Matrix& b) {
             if (a.cols != b.rows) {
-                throw invalid_argument("Number of columns of this must match number of rows of other.");
+                throw invalid_argument("Number of columns in 'a' must match number of rows in 'b'.");
             }
 
             Matrix result = Matrix(a.rows, b.cols);
@@ -105,21 +84,30 @@ class Matrix {
             return result;
         }
 
-        // matrix transpose
-        Matrix transpose() {
-            if (rows != cols) {
-                throw invalid_argument("Number of columns must equal number of rows.");
-            }
-
-            Matrix result = Matrix(rows, cols);
-            for (int i = 0; i < rows; i++) {
-                for (int j = 0; j < cols; j++) {
-                    result.set(j, i, cells[i][j]);
-                }
-            }
+        // static matrix transpose
+        static Matrix transpose(const Matrix& matrix) {
+            Matrix result = Matrix(matrix.cols, matrix.rows);
+            result.map([&matrix](float x, int i, int j) { return matrix.get(j, i); });
             return result;
         }
 
+        // apply a function to every element in matrix
+        void map(const function<float(float, int, int)>& fn) {
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
+                    cells[i][j] = fn(cells[i][j], i, j);
+                }
+            }
+        }
+
+        // static map function
+        static Matrix map(const Matrix& matrix, const function<float(float, int, int)>& fn) {
+            Matrix result = Matrix(matrix.rows, matrix.cols);
+            result.map([&matrix, &fn](float x, int i, int j) { return fn(matrix.get(i, j), i, j); });
+            return result;
+        }
+
+        // display matrix
         void print() {
             for (int i = 0; i < rows; i++) {
                 cout << "[ ";

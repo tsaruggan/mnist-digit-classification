@@ -11,10 +11,29 @@ class Matrix {
         int rows;
         int cols;
 
+        // initialize matrix with zeros
         Matrix(int rows, int cols) {
             this->rows = rows;
             this->cols = cols;
             cells = vector<vector<float>>(rows, vector<float>(cols, 0.0f)); // init with zeros
+        }
+
+        // Initialize a matrix from a 1D vector
+        Matrix(vector<float> array, bool asRow = false) {
+            if (asRow) {
+                // Treat the vector as a single row
+                rows = 1;
+                cols = array.size();
+                cells = vector<vector<float>>(1, array);
+            } else {
+                // Treat the vector as a single column
+                rows = array.size();
+                cols = 1;
+                cells = vector<vector<float>>(rows, vector<float>(1));
+                for (int i = 0; i < rows; i++) {
+                    cells[i][0] = array[i];
+                }
+            }
         }
 
         // get cell value at given position
@@ -46,12 +65,12 @@ class Matrix {
 
         // add a scalar value to every element in matrix
         void add(float n) {
-            map([n](float x, int i, int j) { return x + n; });
+            map([n](float x) { return x + n; });
         }
 
         // multiply a scalar value to every element in matrix
         void multiply(float n) {
-            map([n](float x, int i, int j) { return x * n; });
+            map([n](float x) { return x * n; });
         }
         
         // element-wise add another matrix
@@ -91,7 +110,16 @@ class Matrix {
             return result;
         }
 
-        // apply a function to every element in matrix
+        // map function: apply a function fn(value) to every element in matrix
+        void map(const function<float(float)>& fn) {
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
+                    cells[i][j] = fn(cells[i][j]);
+                }
+            }
+        }
+
+        // map function: apply a function fn(value, i, j) to every element in matrix
         void map(const function<float(float, int, int)>& fn) {
             for (int i = 0; i < rows; i++) {
                 for (int j = 0; j < cols; j++) {
@@ -100,7 +128,14 @@ class Matrix {
             }
         }
 
-        // static map function
+        // static map function: apply a function fn(value) to every element in matrix
+        static Matrix map(const Matrix& matrix, const function<float(float)>& fn) {
+            Matrix result = Matrix(matrix.rows, matrix.cols);
+            result.map([&matrix, &fn](float x, int i, int j) { return fn(matrix.get(i, j)); });
+            return result;
+        }
+        
+        // map function: apply a function fn(value, i, j) to every element in matrix
         static Matrix map(const Matrix& matrix, const function<float(float, int, int)>& fn) {
             Matrix result = Matrix(matrix.rows, matrix.cols);
             result.map([&matrix, &fn](float x, int i, int j) { return fn(matrix.get(i, j), i, j); });
@@ -116,5 +151,10 @@ class Matrix {
                 }
                 cout << "]" << endl;
             }
+        }
+
+        // get copy of cells
+        vector<vector<float>> toArray() const {
+            return cells;
         }
 };

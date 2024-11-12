@@ -3,36 +3,76 @@
 
 using namespace std;
 
-class NeuralNetwork {
-    int numInputs;
-    int numHidden;
-    int numOutputs;
+float sigmoid(float x) {
+    return 1.0f / (1.0f + exp(-x));
+}
 
-    public: 
+class NeuralNetwork {
+    private:
+        int numInputs;
+        int numHidden;
+        int numOutputs;
+
+        Matrix* weightsInputHidden;
+        Matrix* biasHidden;
+
+        Matrix* weightsHiddenOutput;
+        Matrix* biasOutput;
+
+    public:
         NeuralNetwork(int numInputs, int numHidden, int numOutputs) {
             this->numInputs = numInputs;
             this->numHidden = numHidden;
             this->numOutputs = numOutputs;
+
+            // initialize weights and biases for input->hidden layer
+            weightsInputHidden = new Matrix(numHidden, numInputs);
+            weightsInputHidden->randomize();
+            biasHidden = new Matrix(numHidden, 1);
+            biasHidden->randomize();
+
+            // initialize weights and biases for hidden->output layer
+            weightsHiddenOutput = new Matrix(numOutputs, numHidden);
+            weightsHiddenOutput->randomize();
+            biasOutput = new Matrix(numOutputs, 1);
+            biasOutput->randomize();
+        }
+
+        ~NeuralNetwork() {
+            delete weightsInputHidden;
+            delete biasHidden;
+            delete weightsHiddenOutput;
+            delete biasOutput;
+        }
+
+        vector<vector<float>> feedForward(vector<float>& inputArray) {
+            // convert input vector to matrix
+            Matrix input(inputArray); 
+
+            // generate the hidden outputs
+            Matrix hidden = Matrix::multiply(*weightsInputHidden, input);
+            hidden.add(*biasHidden);  // add bias
+            hidden.map(sigmoid);  // apply activation function
+
+            // generate the output outputs
+            Matrix output = Matrix::multiply(*weightsHiddenOutput, hidden);
+            output.add(*biasOutput);  // add bias
+            output.map(sigmoid);  // apply activation function
+
+            // convert the output matrix to a vector
+            return output.toArray();
         }
 };
 
 int main() {
-    NeuralNetwork network = NeuralNetwork(3, 3, 1);
+    NeuralNetwork network = NeuralNetwork(2, 2, 1);
+    vector<float> input = {1.0f, 0.0f};
+    vector<vector<float>> output = network.feedForward(input);
 
-    Matrix a = Matrix(2, 3);
-    a.randomize();
-    a.print();
-    cout << endl;
-
-    Matrix b = Matrix(3, 2);
-    b.randomize();
-    b.print();
-    cout << endl;
-
-    Matrix c = Matrix::multiply(a, b);
-    c.print();
-    cout << endl;
-
-    Matrix d = Matrix::transpose(c);
-    d.print();
+    for (int i = 0; i < output.size(); i++) {
+        for (int j = 0; j < output[i].size(); j++) {
+            cout << output[i][j] << " ";
+        }
+        cout << endl;
+    }
 }

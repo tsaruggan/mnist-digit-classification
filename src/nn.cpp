@@ -5,10 +5,11 @@
 using namespace std;
 
 // initialize neural network architecture
-NeuralNetwork::NeuralNetwork(int numInputs, int numHidden, int numOutputs) {
+NeuralNetwork::NeuralNetwork(int numInputs, int numHidden, int numOutputs, float learningRate) {
     this->numInputs = numInputs;
     this->numHidden = numHidden;
     this->numOutputs = numOutputs;
+    this->learningRate = learningRate;
 
     // initialize weights and biases for input->hidden layer
     weightsInputHidden = new Matrix(numHidden, numInputs);
@@ -32,7 +33,7 @@ NeuralNetwork::~NeuralNetwork() {
 }
 
 // predict the output of a given input
-vector<vector<float>> NeuralNetwork::predict(const vector<float>& inputArray) {
+vector<float> NeuralNetwork::predict(const vector<float>& inputArray) {
     // convert input vector to matrix
     Matrix input = Matrix(inputArray); 
 
@@ -47,12 +48,12 @@ vector<vector<float>> NeuralNetwork::predict(const vector<float>& inputArray) {
     output.map(sigmoid);  // apply activation function!
 
     // convert the output matrix to a vector
-    output.print();
-    return output.toArray();
+    Matrix outputTranspose = Matrix::transpose(output);
+    return outputTranspose.toArray()[0];
 }
 
 // adjust weights and biases to fit a given input and target
-void NeuralNetwork::train(const vector<float>& inputArray, const vector<float>& targetArray, float learningRate) {
+void NeuralNetwork::train(const vector<float>& inputArray, const vector<float>& targetArray) {
     // convert input & target vectors to matrices
     Matrix input = Matrix(inputArray);
     Matrix target = Matrix(targetArray);

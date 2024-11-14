@@ -9,6 +9,7 @@ class NeuralNetwork {
         int numInputs;
         int numHidden;
         int numOutputs;
+        float learningRate;
 
         Matrix* weightsInputHidden;
         Matrix* biasHidden;
@@ -16,11 +17,11 @@ class NeuralNetwork {
         Matrix* biasOutput;
 
     public:
-        NeuralNetwork(int numInputs, int numHidden, int numOutputs);
+        NeuralNetwork(int numInputs, int numHidden, int numOutputs, float learningRate = 0.1);
         ~NeuralNetwork();
 
-        vector<vector<float>> predict(const vector<float>& inputArray);
-        void train(const vector<float>& inputArray, const vector<float>& targetArray, float learningRate = 0.1);
+        vector<float> predict(const vector<float>& inputArray);
+        void train(const vector<float>& inputArray, const vector<float>& targetArray);
 };
 
 static float sigmoid(float x);

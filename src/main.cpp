@@ -2,10 +2,8 @@
 #include <fstream>
 #include "nn.h"
 #include "matrix.h"
-
-// libs used for prediction service
 #include "crow.h"
-#include <opencv2/opencv.hpp>
+
 
 using namespace std;
 
@@ -197,32 +195,18 @@ void runPredictionService() {
 
     CROW_ROUTE(app, "/predict").methods("POST"_method)
     ([&network](const crow::request& req){
-        // receive raw base64 image data
+        // receive image pixel data
         auto body = req.body;
-        string base64Image = crow::json::load(body)["image"].s();
-        
-        // load image in OpenCV
-        vector<unsigned char> imageData = decodeBase64(base64Image);
-        cv::Mat img = cv::imdecode(imageData, cv::IMREAD_GRAYSCALE);
-
-        // normalize image
-        cv::Mat resizedImg;
-        cv::resize(img, resizedImg, cv::Size(28, 28));
-        resizedImg.convertTo(resizedImg, CV_32F, 1.0 / 255.0);
-
-        // flatten image to input vector of floats
-        vector<float> input(784);
-        for (int i = 0; i < 28; ++i) {
-            for (int j = 0; j < 28; ++j) {
-                input[i * 28 + j] = resizedImg.at<float>(i, j);
-            }
+        auto json = crow::json::load(body);
+        vector<float> input;
+        for (const auto& val : json["image"]) {
+            input.push_back(val.d());
         }
 
-        // prepare prediction response
+        // Run prediction
         vector<float> prediction = network.predict(input);
         int number = max_element(prediction.begin(), prediction.end()) - prediction.begin();
-        crow::response res(to_string(number));
-        return res;
+        return crow::response(to_string(number));
     });
 
     // start the server

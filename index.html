@@ -74,23 +74,45 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         });
 
-        // convert the canvas to base64 PNG image
-        function getBase64Image() {
-            return canvas.toDataURL("image/png");
+        // Convert the canvas to 784 floats (28x28 image, normalized to 0-1 range)
+        function getPixels() {
+            // Create a temporary canvas to resize the original image
+            const tempCanvas = document.createElement("canvas");
+            tempCanvas.width = 28;
+            tempCanvas.height = 28;
+            const tempContext = tempCanvas.getContext("2d");
+
+            // Draw the original canvas image onto the resized temporary canvas
+            tempContext.drawImage(canvas, 0, 0, 28, 28); // Resize to 28x28
+
+            // Get pixel data
+            const imageData = tempContext.getImageData(0, 0, 28, 28);
+            const pixels = imageData.data;
+
+            // Separate red, green, and blue channels, then compute grayscale
+            const floats = [];
+            for (let i = 0; i < pixels.length; i += 4) {
+                const red = pixels[i];
+                const green = pixels[i + 1];
+                const blue = pixels[i + 2];
+
+                // Compute grayscale as the average of red, green, and blue
+                const grayscale = (red + green + blue) / 3;
+                floats.push(grayscale / 255.0); // Normalize to [0, 1]
+            }
+
+            return floats;
         }
 
         // predict digit on button click
         document.getElementById("predictBtn").addEventListener("click", () => {
-            const base64Image = getBase64Image(); // get base64 image from canvas
-            let base64Data = base64Image.replace(/^data:image\/(png|jpg);base64,/, ""); // remove prefix
-
-            console.log(JSON.stringify({ image: base64Data }))
-
-            // send base64 image to the server
+            const pixels = getPixels();
+            console.log(JSON.stringify({ image: pixels }))
+            // send image to the server
             fetch('http://localhost:8080/predict', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ image: base64Data }) // Send base64 string in JSON format
+                body: JSON.stringify({ image: pixels }) // Send base64 string in JSON format
             })
             .then(response => response.json())
             .then(data => {

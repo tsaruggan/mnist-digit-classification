@@ -152,8 +152,8 @@ void test(NeuralNetwork& network, vector<vector<float>>& images, vector<vector<f
 
 void trainAndSaveModel() {
     // set training parameters
-    int numHidden = 1;
-    int numEpochs = 1;
+    int numHidden = 256;
+    int numEpochs = 10;
     float learningRate = 0.05;
     
     // load training & testing data from file

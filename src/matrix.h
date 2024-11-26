@@ -33,6 +33,9 @@ class Matrix {
 
         void print();
         vector<vector<float>> toArray() const;
+
+        vector<char> serialize() const;
+        Matrix(const vector<char>& serializedData);
 };
 
 #endif // MATRIX_H

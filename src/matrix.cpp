@@ -150,3 +150,40 @@ void Matrix::print() {
 vector<vector<float>> Matrix::toArray() const {
     return cells;
 }
+
+// serialize matrix
+vector<char> Matrix::serialize() const {
+    vector<char> serializedData;
+
+    // serialize rows and columns
+    const char* numRowsData = reinterpret_cast<const char*>(&rows);
+    const char* numColsData = reinterpret_cast<const char*>(&cols);
+    serializedData.insert(serializedData.end(), numRowsData, numRowsData + sizeof(rows));
+    serializedData.insert(serializedData.end(), numColsData, numColsData + sizeof(cols));
+
+    // serialize matrix data (row by row)
+    for (const vector<float>& row : cells) {
+        const char* rowData = reinterpret_cast<const char*>(row.data());
+        serializedData.insert(serializedData.end(), rowData, rowData + cols * sizeof(float));
+    }
+
+    return serializedData;
+}
+
+// initialize matrix from serialized data
+Matrix::Matrix(const vector<char>& serializedData) {
+    const char* dataPtr = serializedData.data();
+    
+    // deserialize rows and columns
+    rows = *reinterpret_cast<const int*>(dataPtr);
+    dataPtr += sizeof(rows);
+    cols = *reinterpret_cast<const int*>(dataPtr);
+    dataPtr += sizeof(cols);
+    cells = vector<vector<float>>(rows, vector<float>(cols, 0.0f));
+
+    // deserialize matrix data (row by row)
+    for (vector<float>& row : cells) {
+        memcpy(row.data(), dataPtr, cols * sizeof(float));
+        dataPtr += cols * sizeof(float);
+    }
+}

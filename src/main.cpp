@@ -59,7 +59,7 @@ void loadLabels(const string& fileName, vector<vector<float>>& labels) {
     file.close();
 }
 
-void train(NeuralNetwork& network, vector<vector<float>>& images, vector<vector<float>>& labels, int epoch) {
+void train(NeuralNetwork& network, vector<vector<float>>& images, vector<vector<float>>& labels, float learningRate, int epoch) {
     // shuffle the data order
     int n = images.size();
     vector<int> indices(n);
@@ -103,8 +103,8 @@ void test(NeuralNetwork& network, vector<vector<float>>& images, vector<vector<f
 
 int main() {
     // set training parameters
-    int numHidden = 256;
-    int numEpochs = 10;
+    int numHidden = 8;
+    int numEpochs = 3;
     float learningRate = 0.05;
     
     // load training & testing data from file
@@ -124,12 +124,12 @@ int main() {
     // define neural network architecture
     int numInputs = trainImages[0].size(); // 784
     int numOutputs = trainLabels[0].size(); // 10
-    NeuralNetwork network = NeuralNetwork(numInputs, numHidden, numOutputs, learningRate);
+    NeuralNetwork network = NeuralNetwork(numInputs, numHidden, numOutputs);
 
     // train and test accuracy at each epoch
     cout << "Neural network with " << numHidden << " hidden neurons and " << learningRate << " learning rate..." << endl;
     for (int epoch = 1; epoch <= numEpochs; epoch++) {
-        train(network, trainImages, trainLabels, epoch);
+        train(network, trainImages, trainLabels, learningRate, epoch);
         test(network, testImages, testLabels);
     }
 

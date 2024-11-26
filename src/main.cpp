@@ -3,6 +3,8 @@
 #include "nn.h"
 #include "matrix.h"
 
+#include "crow.h"
+
 using namespace std;
 
 void loadImages(const string& fileName, vector<vector<float>>& images) {
@@ -115,7 +117,7 @@ void test(NeuralNetwork& network, vector<vector<float>>& images, vector<vector<f
     cout <<  " | " << accuracy << "% Accuracy" << endl;
 }
 
-int main() {
+void trainAndSaveModel() {
     // set training parameters
     int numHidden = 1;
     int numEpochs = 1;
@@ -150,10 +152,40 @@ int main() {
     // save network
     string modelOutputFile = "model/model.bin";
     saveNetwork(network, modelOutputFile);
+    cout << "Model successfully saved to " << modelOutputFile << endl;
+}
 
+void runPredictionService() {
     // load network
-    NeuralNetwork network2 = loadNetwork(modelOutputFile);
-    test(network2, testImages, testLabels);
+    NeuralNetwork network = loadNetwork("model/model.bin");
+
+    // define an endpoint to handle the POST requests for inference
+    crow::SimpleApp app;
+    CROW_ROUTE(app, "/predict").methods("POST"_method)
+    ([](const crow::request& req){
+        // receive image data (assume base64 for simplicity)
+        // auto imageData = req.body;
+
+        // convert the image data to a format your model can use
+        
+
+        // return prediction
+        // vector<float> prediction = network.predict(inputImage);
+        return crow::response("Hello, world!");
+    });
+
+    // start the server
+    app.port(8080).run();
+}
+
+int main(int argc, char* argv[]) {
+    string operation = argv[1];
+
+    if (operation == "train") {
+        trainAndSaveModel();
+    } else if (operation == "run"){
+        runPredictionService();
+    }
 
     return 0;
 }

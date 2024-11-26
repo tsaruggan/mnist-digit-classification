@@ -1,6 +1,9 @@
 # Compiler and flags
 CXX = g++
-CXXFLAGS = -std=c++11
+CXXFLAGS = -std=c++11 \
+            -I/usr/local/Cellar/opencv/4.10.0_12/include/opencv4
+LDFLAGS = -L/usr/local/Cellar/opencv/4.10.0_12/lib \
+          -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc
 
 # Directories
 SRC_DIR = src
@@ -11,17 +14,21 @@ TARGET = $(EXE_DIR)/classifier  # Executable name
 SRCS = $(wildcard $(SRC_DIR)/*.cpp)
 OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(SRC_DIR)/%.o)
 
-# Default target: build the executable
-make: $(TARGET)
+# Default target: build everything
+all: $(TARGET)
 
-# Run the executable
+# Train target: build and run training
+train: $(TARGET)
+	./$(TARGET) train
+
+# Run target: build and run prediction service
 run: $(TARGET)
-	./$(TARGET)
+	./$(TARGET) run
 
 # Compile and link the object files into the executable
 $(TARGET): $(OBJS)
 	mkdir -p $(EXE_DIR)
-	$(CXX) $(OBJS) -o $(TARGET)
+	$(CXX) $(OBJS) -o $(TARGET) $(LDFLAGS)
 
 # Compile the source files into object files
 $(SRC_DIR)/%.o: $(SRC_DIR)/%.cpp

@@ -65,7 +65,16 @@
         "__hash_table": "cpp",
         "deque": "cpp",
         "forward_list": "cpp",
-        "text_encoding": "cpp"
+        "text_encoding": "cpp",
+        "__node_handle": "cpp",
+        "execution": "cpp",
+        "fstream": "cpp",
+        "iomanip": "cpp",
+        "queue": "cpp",
+        "ratio": "cpp",
+        "sstream": "cpp",
+        "stack": "cpp",
+        "stop_token": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

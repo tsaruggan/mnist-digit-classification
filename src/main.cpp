@@ -3,7 +3,9 @@
 #include "nn.h"
 #include "matrix.h"
 
+// libs used for prediction service
 #include "crow.h"
+#include <opencv2/opencv.hpp>
 
 using namespace std;
 
@@ -73,6 +75,37 @@ NeuralNetwork loadNetwork(const string& fileName) {
     vector<char> networkData((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
     file.close();
     return NeuralNetwork(networkData);
+}
+
+// decode base64 string (from ChatGPT)
+vector<unsigned char> decodeBase64(const string& encodedString) {
+    const string base64Chars =
+             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+             "abcdefghijklmnopqrstuvwxyz"
+             "0123456789+/";
+
+    std::vector<unsigned char> decodedData;
+
+    // create a lookup table for base64 characters
+    std::vector<int> base64Lookup(256, -1);
+    for (int i = 0; i < 64; ++i) {
+        base64Lookup[base64Chars[i]] = i;
+    }
+
+    int val = 0, valb = -8;
+    for (unsigned char c : encodedString) {
+        if (c == '=') break; // padding character
+        if (base64Lookup[c] == -1) continue; // invalid character in base64 string
+        
+        val = (val << 6) + base64Lookup[c];
+        valb += 6;
+        if (valb >= 0) {
+            decodedData.push_back(static_cast<unsigned char>((val >> valb) & 0xFF));
+            valb -= 8;
+        }
+    }
+
+    return decodedData;
 }
 
 void train(NeuralNetwork& network, vector<vector<float>>& images, vector<vector<float>>& labels, float learningRate, int epoch) {
@@ -161,17 +194,35 @@ void runPredictionService() {
 
     // define an endpoint to handle the POST requests for inference
     crow::SimpleApp app;
+
     CROW_ROUTE(app, "/predict").methods("POST"_method)
-    ([](const crow::request& req){
-        // receive image data (assume base64 for simplicity)
-        // auto imageData = req.body;
-
-        // convert the image data to a format your model can use
+    ([&network](const crow::request& req){
+        // receive raw base64 image data
+        auto body = req.body;
+        string base64Image = crow::json::load(body)["image"].s();
         
+        // load image in OpenCV
+        vector<unsigned char> imageData = decodeBase64(base64Image);
+        cv::Mat img = cv::imdecode(imageData, cv::IMREAD_GRAYSCALE);
 
-        // return prediction
-        // vector<float> prediction = network.predict(inputImage);
-        return crow::response("Hello, world!");
+        // normalize image
+        cv::Mat resizedImg;
+        cv::resize(img, resizedImg, cv::Size(28, 28));
+        resizedImg.convertTo(resizedImg, CV_32F, 1.0 / 255.0);
+
+        // flatten image to input vector of floats
+        vector<float> input(784);
+        for (int i = 0; i < 28; ++i) {
+            for (int j = 0; j < 28; ++j) {
+                input[i * 28 + j] = resizedImg.at<float>(i, j);
+            }
+        }
+
+        // prepare prediction response
+        vector<float> prediction = network.predict(input);
+        int number = max_element(prediction.begin(), prediction.end()) - prediction.begin();
+        crow::response res(to_string(number));
+        return res;
     });
 
     // start the server

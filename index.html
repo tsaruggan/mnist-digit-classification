@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MNIST Digit Classification</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #fff;
+            margin: 0;
+            flex-direction: column;
+        }
+        canvas {
+            border: 4px solid red;
+            background-color: black;
+        }
+
+        button {
+            padding: 5px 10px;
+            margin-top: 10px;
+            font-size: 12px;
+            border: none;
+            cursor: pointer;
+
+        }
+    </style>
+</head>
+<body>
+
+    <div>
+        <canvas id="drawingCanvas" width="280" height="280"></canvas>
+        <div>
+            <button id="clearBtn">Clear</button>
+            <button id="predictBtn">Predict</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("drawingCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Set drawing parameters
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 24;
+        ctx.lineCap = "round";
+
+        let isDrawing = false;
+
+        // start drawing
+        canvas.addEventListener("mousedown", (e) => {
+            isDrawing = true;
+            ctx.moveTo(e.offsetX, e.offsetY);
+        });
+
+        // draw on mouse move
+        canvas.addEventListener("mousemove", (e) => {
+            if (isDrawing) {
+                ctx.lineTo(e.offsetX, e.offsetY);
+                ctx.stroke();
+            }
+        });
+
+        // stop drawing
+        canvas.addEventListener("mouseup", () => {
+            isDrawing = false;
+        });
+
+        // clear canvas
+        document.getElementById("clearBtn").addEventListener("click", () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+
+        // convert the canvas to base64 PNG image
+        function getBase64Image() {
+            return canvas.toDataURL("image/png");
+        }
+
+        // predict digit on button click
+        document.getElementById("predictBtn").addEventListener("click", () => {
+            const base64Image = getBase64Image(); // get base64 image from canvas
+            let base64Data = base64Image.replace(/^data:image\/(png|jpg);base64,/, ""); // remove prefix
+
+            console.log(JSON.stringify({ image: base64Data }))
+
+            // send base64 image to the server
+            fetch('http://localhost:8080/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: base64Data }) // Send base64 string in JSON format
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        });
+    </script>
+
+</body>
+</html>

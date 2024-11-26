@@ -59,6 +59,20 @@ void loadLabels(const string& fileName, vector<vector<float>>& labels) {
     file.close();
 }
 
+void saveNetwork(const NeuralNetwork& network, string& fileName) {
+    ofstream file(fileName, ios::binary);
+    vector<char> networkData = network.serialize();
+    file.write(networkData.data(), networkData.size());
+    file.close();
+}
+
+NeuralNetwork loadNetwork(const string& fileName) {
+    ifstream file(fileName, ios::binary);
+    vector<char> networkData((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
+    file.close();
+    return NeuralNetwork(networkData);
+}
+
 void train(NeuralNetwork& network, vector<vector<float>>& images, vector<vector<float>>& labels, float learningRate, int epoch) {
     // shuffle the data order
     int n = images.size();
@@ -103,8 +117,8 @@ void test(NeuralNetwork& network, vector<vector<float>>& images, vector<vector<f
 
 int main() {
     // set training parameters
-    int numHidden = 8;
-    int numEpochs = 3;
+    int numHidden = 1;
+    int numEpochs = 1;
     float learningRate = 0.05;
     
     // load training & testing data from file
@@ -132,6 +146,14 @@ int main() {
         train(network, trainImages, trainLabels, learningRate, epoch);
         test(network, testImages, testLabels);
     }
+
+    // save network
+    string modelOutputFile = "model/model.bin";
+    saveNetwork(network, modelOutputFile);
+
+    // load network
+    NeuralNetwork network2 = loadNetwork(modelOutputFile);
+    test(network2, testImages, testLabels);
 
     return 0;
 }

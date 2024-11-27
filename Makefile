@@ -1,6 +1,7 @@
 # Compiler and flags
 CXX = g++
 CXXFLAGS = -std=c++17
+LDFLAGS = -lssl -lcrypto
 
 # Directories
 SRC_DIR = src

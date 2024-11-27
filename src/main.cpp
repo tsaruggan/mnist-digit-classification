@@ -1,3 +1,4 @@
+#define CROW_ENABLE_SSL
 #include "crow.h"
 #include "crow/middlewares/cors.h"
 
@@ -222,7 +223,9 @@ void runPredictionService() {
     });
     
     // start the HTTPs server
-    app.port(8080).run();
+    string certFile = "./server.crt";
+    string keyFile = "./server.key";
+    app.port(443).ssl_file(certFile, keyFile).run();
 }
 
 int main(int argc, char* argv[]) {

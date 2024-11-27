@@ -199,7 +199,7 @@ void runPredictionService() {
         crow::response res;
 
         // Handle preflight (OPTIONS) requests for CORS
-        if (req.method == "OPTIONS") {
+        if (req.method == crow::HTTPMethod::OPTIONS) {
             res.add_header("Access-Control-Allow-Origin", "*");
             res.add_header("Access-Control-Allow-Methods", "POST, OPTIONS");
             res.add_header("Access-Control-Allow-Headers", "Content-Type, Authorization");

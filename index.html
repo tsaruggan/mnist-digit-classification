@@ -107,9 +107,9 @@
         // predict digit on button click
         document.getElementById("predictBtn").addEventListener("click", () => {
             const pixels = getPixels();
-            console.log(JSON.stringify({ image: pixels }))
+            // console.log(JSON.stringify({ image: pixels }))
             // send image to the server
-            fetch('http://localhost:8080/predict', {
+            fetch('http://3.142.196.190:8080/predict', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ image: pixels }) // Send base64 string in JSON format

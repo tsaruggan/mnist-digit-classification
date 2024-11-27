@@ -194,9 +194,19 @@ void runPredictionService() {
     // define an endpoint to handle the POST requests for inference
     crow::SimpleApp app;
 
-    CROW_ROUTE(app, "/predict").methods("POST"_method)
+    CROW_ROUTE(app, "/predict").methods("POST"_method, "OPTIONS"_method)
     ([&network](const crow::request& req){
-        // receive image pixel data
+        crow::response res;
+
+        // Handle preflight (OPTIONS) requests for CORS
+        if (req.method == "OPTIONS") {
+            res.add_header("Access-Control-Allow-Origin", "*");
+            res.add_header("Access-Control-Allow-Methods", "POST, OPTIONS");
+            res.add_header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+            return res;
+        }
+
+        // Handle POST request for prediction
         auto body = req.body;
         auto json = crow::json::load(body);
         vector<float> input;
@@ -207,11 +217,15 @@ void runPredictionService() {
         // Run prediction
         vector<float> prediction = network.predict(input);
         int number = max_element(prediction.begin(), prediction.end()) - prediction.begin();
-        return crow::response(to_string(number));
+        res = crow::response(to_string(number));
+
+        // Add CORS headers for the response
+        res.add_header("Access-Control-Allow-Origin", "*");
+        return res;
     });
 
     // start the server
-    app.port(8080).run();
+    app.port(8080).multithreaded().run();
 }
 
 int main(int argc, char* argv[]) {

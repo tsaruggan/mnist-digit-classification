@@ -7,35 +7,39 @@
     <style>
         body {
             display: flex;
-            justify-content: center;
-            align-items: center;
             height: 100vh;
             background-color: #fff;
             margin: 0;
             flex-direction: column;
+            margin: 12px;
+            font-family: 'Courier New', Courier, monospace;
         }
         canvas {
-            border: 4px solid red;
+            border: 4px solid black;
             background-color: black;
         }
 
         button {
             padding: 5px 10px;
-            margin-top: 10px;
+            margin-top: 12px;
+            margin-right: 12px;
             font-size: 12px;
-            border: none;
+            border: solid;
             cursor: pointer;
+        }
 
+        #number {
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-
     <div>
         <canvas id="drawingCanvas" width="280" height="280"></canvas>
         <div>
             <button id="clearBtn">Clear</button>
             <button id="predictBtn">Predict</button>
+            <span id="number"></span>
         </div>
     </div>
 
@@ -45,8 +49,12 @@
 
         // Set drawing parameters
         ctx.strokeStyle = "white";
-        ctx.lineWidth = 24;
+        ctx.lineWidth = 18;
         ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.shadowColor = "black";
+        ctx.shadowBlur = 0.5;
+        ctx.filter = "blur(1px)";
 
         let isDrawing = false;
 
@@ -72,6 +80,8 @@
         // clear canvas
         document.getElementById("clearBtn").addEventListener("click", () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            document.getElementById("number").innerText = '';
         });
 
         // Convert the canvas to 784 floats (28x28 image, normalized to 0-1 range)
@@ -107,16 +117,15 @@
         // predict digit on button click
         document.getElementById("predictBtn").addEventListener("click", () => {
             const pixels = getPixels();
-            // console.log(JSON.stringify({ image: pixels }))
-            // send image to the server
             fetch('http://3.142.196.190:8080/predict', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ image: pixels }) // Send base64 string in JSON format
+                body: JSON.stringify({ image: pixels }) 
             })
             .then(response => response.json())
             .then(data => {
                 console.log(data);
+                document.getElementById("number").innerText = `${data}`;
             })
             .catch(error => {
                 console.error("Error:", error);

@@ -4,7 +4,6 @@
 #include "matrix.h"
 #include "crow.h"
 
-
 using namespace std;
 
 void loadImages(const string& fileName, vector<vector<float>>& images) {
@@ -113,7 +112,9 @@ void train(NeuralNetwork& network, vector<vector<float>>& images, vector<vector<
     for (int i = 0; i < n; i++) {
         indices[i] = i;
     }
-    random_shuffle(indices.begin(), indices.end());
+    random_device rd;
+    mt19937 g(rd());
+    shuffle(indices.begin(), indices.end(), g);
 
     // train network on training data
     int progress = 0;

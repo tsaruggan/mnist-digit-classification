@@ -1,6 +1,7 @@
 #include <iostream>
 #include "nn.h"
 #include "matrix.h"
+#include <cmath>
 
 using namespace std;
 

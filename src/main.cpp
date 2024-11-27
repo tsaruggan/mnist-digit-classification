@@ -1,9 +1,11 @@
+#define CROW_ENABLE_SSL
+#include "crow.h"
+#include "crow/middlewares/cors.h"
+
 #include <iostream>
 #include <fstream>
 #include "nn.h"
 #include "matrix.h"
-#include "crow.h"
-#include "crow/middlewares/cors.h"
 
 using namespace std;
 

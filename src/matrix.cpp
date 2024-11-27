@@ -1,6 +1,7 @@
 #include <iostream>
 #include <random>
 #include "matrix.h"
+#include <cstring>
 
 using namespace std;
 

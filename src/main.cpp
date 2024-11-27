@@ -223,9 +223,9 @@ void runPredictionService() {
     });
     
     // start the HTTPs server
-    string certFile = "/path/to/server.crt";
-    string keyFile = "/path/to/server.key";
-    app.port(18080).ssl_file(certFile, keyFile).run();
+    string certFile = "../server.crt";
+    string keyFile = "../server.key";
+    app.port(8080).ssl_file(certFile, keyFile).run();
 }
 
 int main(int argc, char* argv[]) {

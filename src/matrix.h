@@ -1,6 +1,9 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
+#include <vector>
+#include <functional>
+
 using namespace std;
 
 class Matrix {

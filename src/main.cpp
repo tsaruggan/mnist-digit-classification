@@ -220,8 +220,10 @@ void runPredictionService() {
         return crow::response(to_string(number));
     });
     
-    // start the server
-    app.port(8080).run();
+    // start the HTTPs server
+    string certFile = "/path/to/server.crt";
+    string keyFile = "/path/to/server.key";
+    app.port(8080).ssl(certFile, keyFile).run();
 }
 
 int main(int argc, char* argv[]) {

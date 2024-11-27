@@ -3,6 +3,7 @@
 #include "nn.h"
 #include "matrix.h"
 #include "crow.h"
+#include "crow/middlewares/cors.h"
 
 using namespace std;
 
@@ -191,41 +192,36 @@ void runPredictionService() {
     // load network
     NeuralNetwork network = loadNetwork("model/model.bin");
 
-    // define an endpoint to handle the POST requests for inference
-    crow::SimpleApp app;
-
-    CROW_ROUTE(app, "/predict").methods("POST"_method, "OPTIONS"_method)
-    ([&network](const crow::request& req){
-        crow::response res;
-
-        // Handle preflight (OPTIONS) requests for CORS
-        if (req.method == crow::HTTPMethod::OPTIONS) {
-            res.add_header("Access-Control-Allow-Origin", "*");
-            res.add_header("Access-Control-Allow-Methods", "POST, OPTIONS");
-            res.add_header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-            return res;
-        }
-
-        // Handle POST request for prediction
+    // Create app with CORS middleware
+    crow::App<crow::CORSHandler> app;
+    
+    // Configure CORS
+    auto& cors = app.get_middleware<crow::CORSHandler>();
+    cors
+        .global()
+        .headers("Content-Type", "Accept")
+        .methods("POST"_method, "OPTIONS"_method)
+        .origin("*");  // Allow any origin
+    
+    // Define prediction endpoint
+    CROW_ROUTE(app, "/predict").methods("POST"_method)
+    ([&network](const crow::request& req) {
+        // receive image pixel data
         auto body = req.body;
         auto json = crow::json::load(body);
         vector<float> input;
         for (const auto& val : json["image"]) {
             input.push_back(val.d());
         }
-
+        
         // Run prediction
         vector<float> prediction = network.predict(input);
         int number = max_element(prediction.begin(), prediction.end()) - prediction.begin();
-        res = crow::response(to_string(number));
-
-        // Add CORS headers for the response
-        res.add_header("Access-Control-Allow-Origin", "*");
-        return res;
+        return crow::response(to_string(number));
     });
-
+    
     // start the server
-    app.port(8080).multithreaded().run();
+    app.port(8080).run();
 }
 
 int main(int argc, char* argv[]) {

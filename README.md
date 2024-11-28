@@ -2,7 +2,7 @@
 
 This is a complete neural network implementation in plain C++ to solve the MNIST handwritten digit classification problem.
 
-Run `make` to build the executable, then `make train` to begin training/testing.
+Run `make` to build the executable, then `make train` to begin training/testing. Use `make run` to run the prediction service using a [Crow](https://crowcpp.org/) server.
 
 Try the live [demo](https://strengthened-tundra-deal.glitch.me)
 

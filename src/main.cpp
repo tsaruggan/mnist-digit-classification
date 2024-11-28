@@ -1,4 +1,3 @@
-#define CROW_ENABLE_SSL
 #include "crow.h"
 #include "crow/middlewares/cors.h"
 
@@ -75,37 +74,6 @@ NeuralNetwork loadNetwork(const string& fileName) {
     vector<char> networkData((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
     file.close();
     return NeuralNetwork(networkData);
-}
-
-// decode base64 string (from ChatGPT)
-vector<unsigned char> decodeBase64(const string& encodedString) {
-    const string base64Chars =
-             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-             "abcdefghijklmnopqrstuvwxyz"
-             "0123456789+/";
-
-    std::vector<unsigned char> decodedData;
-
-    // create a lookup table for base64 characters
-    std::vector<int> base64Lookup(256, -1);
-    for (int i = 0; i < 64; ++i) {
-        base64Lookup[base64Chars[i]] = i;
-    }
-
-    int val = 0, valb = -8;
-    for (unsigned char c : encodedString) {
-        if (c == '=') break; // padding character
-        if (base64Lookup[c] == -1) continue; // invalid character in base64 string
-        
-        val = (val << 6) + base64Lookup[c];
-        valb += 6;
-        if (valb >= 0) {
-            decodedData.push_back(static_cast<unsigned char>((val >> valb) & 0xFF));
-            valb -= 8;
-        }
-    }
-
-    return decodedData;
 }
 
 void train(NeuralNetwork& network, vector<vector<float>>& images, vector<vector<float>>& labels, float learningRate, int epoch) {
@@ -222,10 +190,8 @@ void runPredictionService() {
         return crow::response(to_string(number));
     });
     
-    // start the HTTPs server
-    string certFile = "./server.crt";
-    string keyFile = "./server.key";
-    app.port(443).ssl_file(certFile, keyFile).run();
+    // start the HTTP server
+    app.port(8080).run();
 }
 
 int main(int argc, char* argv[]) {
